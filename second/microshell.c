@@ -38,45 +38,29 @@ int exec_cd(char **args) {
 	return (1);	
 }
 
-char **create_args(char **argv, int i, int nb_args) {
-	char **args;
-	int j = -1;
-
-	if (!(args = (char**)malloc(sizeof(char*) * (nb_args + 1)))) {
-		err_msg(ERR_SYS, 0, NULL);
-		return (NULL);
-	}
-	while(++j < nb_args)
-		args[j] = argv[(i - nb_args) + j];
-	args[j] = NULL;
-	return (args);
-}
-
 int main(int argc, char **argv, char **envp) {
 	int previous_fd = -1;
 	int fildes[2];
-	char **args;
 	int nb_args = 0;
 	pid_t cpid;
 	int i = 0;
 	int is_piped = 0;
 	int stat_loc;
-	int ret;
+	int ret = 0;
+	int is_semicolon = 0;
 
 	if (argc >= 2) {
 		while (++i <= argc) 
 		{
 			if (argv[i] && strcmp(argv[i], ";") != 0 && strcmp(argv[i], "|") != 0)
 				nb_args++;
-			else 
+			else if (nb_args != 0) 
 			{
-				if (!(args = create_args(argv, i, nb_args)))
-					return (1);	
-				nb_args = 0;
-				if (args[0] && strcmp(args[0], "cd") == 0) 
-					exec_cd(args);
+				if (argv[i - nb_args] && strcmp(argv[i - nb_args], "cd") == 0) 
+					exec_cd(argv + i - nb_args);
 				else 
 				{
+					is_semicolon = argv[i] && strcmp(argv[i], ";") == 0;
 					is_piped = 0;
 					if (argv[i] && strcmp(argv[i], "|") == 0) 
 					{
@@ -84,7 +68,7 @@ int main(int argc, char **argv, char **envp) {
 						if (pipe(fildes) == -1)
 							return (err_msg(ERR_SYS, 1, NULL));
 					}
-
+					argv[i] = NULL;
 					cpid = fork();
 					if (cpid == -1)
 						return (err_msg(ERR_SYS, 1, NULL));
@@ -105,9 +89,8 @@ int main(int argc, char **argv, char **envp) {
 								exit(err_msg(ERR_SYS, -1, NULL));
 						}
 
-						if (execve(args[0], args, envp) == -1)
-							err_msg(ERR_EXEC, 1, args[0]);
-						free(args);
+						if (execve(argv[i - nb_args], argv + i - nb_args, envp) == -1)
+							err_msg(ERR_EXEC, 1, argv[i - nb_args]);
 						exit(1);
 					}
 					else 
@@ -126,11 +109,10 @@ int main(int argc, char **argv, char **envp) {
 								return (1);
 						}
 					}	
-					if (argv[i] && strcmp(argv[i], ";") == 0) {
+					if(is_semicolon)
 						previous_fd = -1;
-					}
 				}
-				free(args);
+				nb_args = 0;
 			}
 		}
 	}
