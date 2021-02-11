@@ -77,6 +77,7 @@ int main(int argc, char **argv, char **envp) {
 					exec_cd(args);
 				else 
 				{
+					is_piped = 0;
 					if (argv[i] && strcmp(argv[i], "|") == 0) 
 					{
 						is_piped = 1;
@@ -92,7 +93,7 @@ int main(int argc, char **argv, char **envp) {
 					{
 						if (previous_fd != -1) {
 							close(STDIN);
-							if (dup(previous_fd) == -1)
+							if(dup(previous_fd) == -1)
 								exit(err_msg(ERR_SYS, -1, NULL));
 							close(previous_fd);
 						}
@@ -106,7 +107,6 @@ int main(int argc, char **argv, char **envp) {
 
 						if (execve(args[0], args, envp) == -1)
 							err_msg(ERR_EXEC, 1, args[0]);
-						close(fildes[1]);
 						free(args);
 						exit(1);
 					}
@@ -118,22 +118,16 @@ int main(int argc, char **argv, char **envp) {
 							close(fildes[1]);
 							previous_fd = fildes[0];
 						}
-						if (!(argv[i]) || (argv[i] && strcmp(argv[i], ";") == 0)) {
-							if(waitpid(cpid, &stat_loc, 0) == -1)
-							{
-								printf("waitpid\n");
-								return (err_msg(ERR_SYS, 1, NULL));
-							}
-							if (WIFEXITED(stat_loc)) {
-								ret = WEXITSTATUS(stat_loc);
-								if (ret == -1)
-									return (1);
-							}
+						if(waitpid(cpid, &stat_loc, 0) == -1)
+							return (err_msg(ERR_SYS, 1, NULL));
+						if (WIFEXITED(stat_loc)) {
+							ret = WEXITSTATUS(stat_loc);
+							if (ret == -1)
+								return (1);
 						}
 					}	
 					if (argv[i] && strcmp(argv[i], ";") == 0) {
 						previous_fd = -1;
-						is_piped = 0;
 					}
 				}
 				free(args);
