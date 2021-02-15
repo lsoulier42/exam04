@@ -58,7 +58,11 @@ int main(int argc, char **argv, char **envp) {
 			{
 				if (argv[i - nb_args] && strcmp(argv[i - nb_args], "cd") == 0) 
 					exec_cd(argv + i - nb_args);
+<<<<<<< HEAD:second/main.c
+				else if (nb_args) 
+=======
 				else 
+>>>>>>> 5dd6a6d0ce7458abaca1e59a947ce8e32f9422b3:second/microshell.c
 				{
 					is_semicolon = argv[i] && strcmp(argv[i], ";") == 0;
 					is_piped = 0;
@@ -66,47 +70,43 @@ int main(int argc, char **argv, char **envp) {
 					{
 						is_piped = 1;
 						if (pipe(fildes) == -1)
-							return (err_msg(ERR_SYS, 1, NULL));
+							exit(err_msg(ERR_SYS, 1, NULL));
 					}
 					argv[i] = NULL;
 					cpid = fork();
 					if (cpid == -1)
-						return (err_msg(ERR_SYS, 1, NULL));
+						exit(err_msg(ERR_SYS, 1, NULL));
 
 					if (cpid == 0) 
 					{
 						if (previous_fd != -1) {
-							close(STDIN);
-							if(dup(previous_fd) == -1)
-								exit(err_msg(ERR_SYS, -1, NULL));
-							close(previous_fd);
+							if(dup2(previous_fd, STDIN) == -1)
+							exit(err_msg(ERR_SYS, 1, NULL));
 						}
 
 						if (is_piped) {
 							close(fildes[0]);
-							close(STDOUT);
-							if(dup(fildes[1]) == -1)
-								exit(err_msg(ERR_SYS, -1, NULL));
+							if(dup2(fildes[1], STDOUT) == -1)
+								exit(err_msg(ERR_SYS, 1, NULL));
 						}
 
 						if (execve(argv[i - nb_args], argv + i - nb_args, envp) == -1)
+<<<<<<< HEAD:second/main.c
+							exit(err_msg(ERR_EXEC, 1, argv[i - nb_args]));
+						exit(0);
+=======
 							err_msg(ERR_EXEC, 1, argv[i - nb_args]);
 						exit(1);
+>>>>>>> 5dd6a6d0ce7458abaca1e59a947ce8e32f9422b3:second/microshell.c
 					}
 					else 
 					{
+						waitpid(cpid, &stat_loc, 0);
 						if (previous_fd != -1)
 							close(previous_fd);
 						if (is_piped) {
 							close(fildes[1]);
 							previous_fd = fildes[0];
-						}
-						if(waitpid(cpid, &stat_loc, 0) == -1)
-							return (err_msg(ERR_SYS, 1, NULL));
-						if (WIFEXITED(stat_loc)) {
-							ret = WEXITSTATUS(stat_loc);
-							if (ret == -1)
-								return (1);
 						}
 					}	
 					if(is_semicolon)
@@ -118,4 +118,3 @@ int main(int argc, char **argv, char **envp) {
 	}
 	return (ret);
 }
-
