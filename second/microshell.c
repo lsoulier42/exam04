@@ -58,11 +58,8 @@ int main(int argc, char **argv, char **envp) {
 			{
 				if (argv[i - nb_args] && strcmp(argv[i - nb_args], "cd") == 0) 
 					exec_cd(argv + i - nb_args);
-<<<<<<< HEAD:second/main.c
 				else if (nb_args) 
-=======
-				else 
->>>>>>> 5dd6a6d0ce7458abaca1e59a947ce8e32f9422b3:second/microshell.c
+
 				{
 					is_semicolon = argv[i] && strcmp(argv[i], ";") == 0;
 					is_piped = 0;
@@ -91,13 +88,8 @@ int main(int argc, char **argv, char **envp) {
 						}
 
 						if (execve(argv[i - nb_args], argv + i - nb_args, envp) == -1)
-<<<<<<< HEAD:second/main.c
 							exit(err_msg(ERR_EXEC, 1, argv[i - nb_args]));
 						exit(0);
-=======
-							err_msg(ERR_EXEC, 1, argv[i - nb_args]);
-						exit(1);
->>>>>>> 5dd6a6d0ce7458abaca1e59a947ce8e32f9422b3:second/microshell.c
 					}
 					else 
 					{
