@@ -68,17 +68,16 @@ int main(int argc, char **argv, char **envp) {
 				nb_args++;
 			else if (nb_args != 0) 
 			{
+				is_semicolon = argv[i] && strcmp(argv[i], ";") == 0;
+				is_piped = argv[i] && strcmp(argv[i], "|") == 0;
+				argv[i] = NULL;
 				if (argv[i - nb_args] && strcmp(argv[i - nb_args], "cd") == 0) 
 					ret = exec_cd(argv + i - nb_args) == 0;
-				else if (nb_args) 
-
+				else
 				{
-					is_semicolon = argv[i] && strcmp(argv[i], ";") == 0;
-					is_piped = argv[i] && strcmp(argv[i], "|") == 0;
 					if (is_piped)
 						if (pipe(fildes) == -1)
 							return(exit_syscall(previous_fd, is_piped, fildes, 1));
-					argv[i] = NULL;
 					cpid = fork();
 					if (cpid == -1)
 						return(exit_syscall(previous_fd, is_piped, fildes, 1));
