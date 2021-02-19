@@ -1,8 +1,7 @@
-#ifndef MAIN_H
-# define MAIN_H
+#ifndef MICROSHELL_H
+# define MICROSHELL_H
 # include <unistd.h>
 # include <stdlib.h>
-# include <signal.h>
 # include <sys/wait.h>
 # include <string.h>
 
@@ -22,4 +21,6 @@ enum e_err {
 int ft_strlen(char *str);
 void puterr(char *str);
 int err_msg(int code, int ret, char *arg);
+int exec_cd(char **argv);
+int exit_syscall(int previous_fd, int is_piped, int fildes[2], int ret);
 #endif
