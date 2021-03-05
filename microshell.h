@@ -15,7 +15,8 @@ enum e_err {
 	ERR_SYS,
 	ERR_CD_ARG,
 	ERR_CD_DIR,
-	ERR_EXEC
+	ERR_EXEC,
+	ERR_CHILD
 };
 
 int ft_strlen(char *str);
